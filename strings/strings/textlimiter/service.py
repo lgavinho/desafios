@@ -9,6 +9,7 @@ class TextFormatter:
 
     MINIMUM_NUMBER_OF_WORDS_PER_LINE = 2
     BREAK_LINE = '\n'
+    BREAK_LINE_WINDOWS = '\r\n'
     BREAK_PARAGRAPH = '\n\n'
     WORD_SEPARATOR = ' '
 
@@ -16,6 +17,97 @@ class TextFormatter:
 
     def __init__(self, text):
         self.source_text = text
+
+    def limiter(self, line_size_chars=40):
+        text = self.cleanup_text()
+        if text == '':
+            return self.source_text
+
+        # Wrap this text.
+        wrapper = textwrap.TextWrapper(width=line_size_chars)
+        all_paragraphs = text.split(self.BREAK_PARAGRAPH)
+        output = ''
+        for paragraph in all_paragraphs:
+            wrapped = wrapper.fill(text=paragraph)
+            text_without_spaces_in_right_left = wrapped.strip()
+            if output != '':
+                output += self.BREAK_PARAGRAPH
+            output += text_without_spaces_in_right_left
+
+        return output
+
+    def cleanup_text(self):
+        cleaned_breakline_from_web = self.source_text.replace(self.BREAK_LINE_WINDOWS, self.BREAK_LINE)
+        all_paragraphs = cleaned_breakline_from_web.split(self.BREAK_PARAGRAPH)
+        output = ''
+        for paragraph in all_paragraphs:
+            all_lines = paragraph.split(self.BREAK_LINE)
+            for line in all_lines:
+                cleaned_extra_spaces = line.replace('  ', ' ')
+                cleaned_line = cleaned_extra_spaces.strip()
+                output += cleaned_line + self.BREAK_LINE
+            if output != '':
+                output += self.BREAK_PARAGRAPH
+        return output
+
+    def limiter_and_justify(self, line_size_chars=40):
+        if self.source_text == '':
+            return self.source_text
+
+        text = self.limiter(line_size_chars=line_size_chars)
+        if text == '':
+            return text
+
+        all_paragraphs = text.split(self.BREAK_PARAGRAPH)
+        output = ''
+        for paragraph in all_paragraphs:
+            lines = paragraph.split(self.BREAK_LINE)
+            for line in lines:
+                justified_line = self.justify_text_line(text=line, line_size_chars=line_size_chars)
+                output += justified_line + self.BREAK_LINE
+            if output != '':
+                output += self.BREAK_LINE
+
+        return output
+
+    def justify_text_line(self, text, line_size_chars=40):
+        # check if it is already justify
+        if len(text) == line_size_chars:
+            return text
+
+        cleaned_text = text.strip()
+
+        words = self.get_words(source=cleaned_text)
+        number_of_words = len(words)
+
+        if number_of_words <= self.MINIMUM_NUMBER_OF_WORDS_PER_LINE:
+            return cleaned_text
+
+        word_order_to_add_spaces = self.get_order_to_add_spaces_to_justify_text(number_of_words=number_of_words)
+        number_of_spaces_to_add_in_line = line_size_chars - len(cleaned_text)
+        current_position_to_add_space = 0
+        words_spaces = {}
+        for number_of_spaces in range(1, number_of_spaces_to_add_in_line + 1):
+            add_space_to = word_order_to_add_spaces[current_position_to_add_space]
+            current_position_to_add_space += 1
+            if current_position_to_add_space >= len(word_order_to_add_spaces):
+                current_position_to_add_space = 0
+
+            if add_space_to in words_spaces:
+                words_spaces[add_space_to] += 1
+            else:
+                words_spaces[add_space_to] = 1
+
+        # build the line
+        new_line = ''
+        for word_position in range(0, number_of_words):
+            number_of_extra_spaces = 0
+            if word_position in words_spaces:
+                number_of_extra_spaces = words_spaces[word_position]
+            spaces = ' ' * (number_of_extra_spaces + 1)
+            new_line += words[word_position] + spaces
+
+        return new_line.rstrip()
 
     def get_words(self, source):
         source_lines = source.split(self.BREAK_LINE)
@@ -53,91 +145,6 @@ class TextFormatter:
                 column_position += 1
         return order_to_add_spaces
 
-    def justify_text_line(self, text, line_size_chars=40):
-        # check if it is already justify
-        if len(text) == line_size_chars:
-            return text
-
-        words = self.get_words(source=text)
-        number_of_words = len(words)
-
-        if number_of_words <= self.MINIMUM_NUMBER_OF_WORDS_PER_LINE:
-            return text
-
-        word_order_to_add_spaces = self.get_order_to_add_spaces_to_justify_text(number_of_words=number_of_words)
-        number_of_spaces_to_add_in_line = line_size_chars - len(text)
-        current_position_to_add_space = 0
-        words_spaces = {}
-        for number_of_spaces in range(1, number_of_spaces_to_add_in_line + 1):
-            add_space_to = word_order_to_add_spaces[current_position_to_add_space]
-            current_position_to_add_space += 1
-            if current_position_to_add_space >= len(word_order_to_add_spaces):
-                current_position_to_add_space = 0
-
-            if add_space_to in words_spaces:
-                words_spaces[add_space_to] += 1
-            else:
-                words_spaces[add_space_to] = 1
-
-        # build the line
-        new_line = ''
-        for word_position in range(0, number_of_words):
-            number_of_extra_spaces = 0
-            if word_position in words_spaces:
-                number_of_extra_spaces = words_spaces[word_position]
-            spaces = ' ' * (number_of_extra_spaces + 1)
-            new_line += words[word_position] + spaces
-
-        return new_line.rstrip()
-
-    def cleanup_text(self):
-        all_paragraphs = self.source_text.split(self.BREAK_PARAGRAPH)
-        output = ''
-        for paragraph in all_paragraphs:
-            lines = paragraph.split(self.BREAK_LINE)
-            for line in lines:
-                cleaned_extra_spaces = line.replace('  ', ' ')
-                cleaned_line = cleaned_extra_spaces.rstrip().lstrip()
-                output += cleaned_line + self.BREAK_LINE
-            if output != '':
-                output += self.BREAK_LINE
-        return output
-
-    def limiter(self, line_size_chars=40):
-        text = self.cleanup_text()
-        if text == '':
-            return self.source_text
-
-        # Wrap this text.
-        wrapper = textwrap.TextWrapper(width=line_size_chars)
-        all_paragraphs = self.source_text.split(self.BREAK_PARAGRAPH)
-        output = ''
-        for paragraph in all_paragraphs:
-            wrapped = wrapper.fill(text=paragraph)
-            if output != '':
-                output += self.BREAK_PARAGRAPH
-            output += wrapped
-        return output
-
-    def limiter_and_justify(self, line_size_chars=40):
-        if self.source_text == '':
-            return self.source_text
-
-        text = self.limiter(line_size_chars=line_size_chars)
-        # justify each line
-        if text == '':
-            return text
-
-        all_paragraphs = text.split(self.BREAK_PARAGRAPH)
-        output = ''
-        for paragraph in all_paragraphs:
-            lines = paragraph.split(self.BREAK_LINE)
-            for line in lines:
-                justified_line = self.justify_text_line(text=line, line_size_chars=line_size_chars)
-                output += justified_line + self.BREAK_LINE
-            if output != '':
-                output += self.BREAK_LINE
-        return output
-
-
-
+    def count_lines(self, text):
+        all_lines = text.split(self.BREAK_LINE)
+        return len(all_lines)

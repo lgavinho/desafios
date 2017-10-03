@@ -14,7 +14,7 @@ class textFormatterTest(TestCase):
         self.fixtures_base = base = settings.BASE_DIR + '/textlimiter/fixtures/'
 
     def count_words(self, text):
-        source_lines = text.split('\n')
+        source_lines = text.split(TextFormatter.BREAK_LINE)
         total_words = 0
         for line in source_lines:
             line_words = line.split(' ')
@@ -39,7 +39,7 @@ class textFormatterTest(TestCase):
         total_of_result_words = self.count_words(text=result)
         self.assertEqual(total_of_source_words, total_of_result_words)
         # assert size of each line
-        splited = result.split('\n')
+        splited = result.split(TextFormatter.BREAK_LINE)
         for line in splited:
             self.assertTrue(len(line) <= maxchars)
 
@@ -59,7 +59,7 @@ class textFormatterTest(TestCase):
         total_of_result_words = self.count_words(text=result)
         self.assertEqual(total_of_source_words, total_of_result_words)
         # assert size of each line
-        splited = result.split('\n')
+        splited = result.split(TextFormatter.BREAK_LINE)
         for line in splited:
             self.assertTrue(len(line) <= maxchars)
 
@@ -79,7 +79,7 @@ class textFormatterTest(TestCase):
         total_of_result_words = self.count_words(text=result)
         self.assertEqual(total_of_source_words, total_of_result_words)
         # assert size of each line
-        splited = result.split('\n')
+        splited = result.split(TextFormatter.BREAK_LINE)
         for line in splited:
             self.assertTrue(len(line) <= maxchars)
 
@@ -99,7 +99,7 @@ class textFormatterTest(TestCase):
         total_of_result_words = self.count_words(text=result)
         self.assertEqual(total_of_source_words, total_of_result_words)
         # assert size of each line
-        splited = result.split('\n')
+        splited = result.split(TextFormatter.BREAK_LINE)
         for line in splited:
             self.assertTrue(len(line) <= maxchars)
 
@@ -127,7 +127,7 @@ class textFormatterTest(TestCase):
         total_of_result_words = self.count_words(text=result)
         self.assertEqual(total_of_source_words, total_of_result_words)
         # assert size of each line
-        splited = result.split('\n')
+        splited = result.split(TextFormatter.BREAK_LINE)
         for line in splited:
             self.assertTrue(len(line) <= maxchars)
 
@@ -158,9 +158,9 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0 and self.count_words(line) > TextFormatter.MINIMUM_NUMBER_OF_WORDS_PER_LINE:
                     self.assertTrue(len(line) == maxchars)
@@ -178,9 +178,9 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0 and self.count_words(line) > TextFormatter.MINIMUM_NUMBER_OF_WORDS_PER_LINE:
                     self.assertTrue(len(line) == maxchars)
@@ -198,9 +198,9 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0 and self.count_words(line) > TextFormatter.MINIMUM_NUMBER_OF_WORDS_PER_LINE:
                     self.assertTrue(len(line) == maxchars)
@@ -218,9 +218,9 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0:
                     self.assertTrue(len(line) == maxchars)
@@ -238,9 +238,9 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0:
                     self.assertTrue(len(line) == maxchars)
@@ -258,12 +258,12 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0:
-                    self.assertTrue(len(line) == maxchars)
+                    self.assertTrue(length_of_line == maxchars)
 
     def test_limit_with_40_chars_and_justify_empty_source(self):
         # test parameter
@@ -294,9 +294,9 @@ class textFormatterTest(TestCase):
         result = service.limiter_and_justify(line_size_chars=maxchars)
 
         # assert size of each line
-        all_lines = result.split('\n')
+        all_lines = result.split(TextFormatter.BREAK_LINE)
         for line in all_lines:
-            if line != '\n\n':
+            if line != TextFormatter.BREAK_PARAGRAPH:
                 length_of_line = len(line)
                 if length_of_line > 0:
                     self.assertTrue(len(line) == maxchars)

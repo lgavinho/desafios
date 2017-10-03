@@ -2,6 +2,29 @@
 
 {% block content %}
 
-<p>Teste</p>
+<h2>Text Limiter </h2>
+
+<div class="row">
+    <div class="col">
+        <form method="POST" class="form-horizontal">{% csrf_token %}
+            <!--{{ form.as_p }}-->
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.errors }}
+                {{ field.label_tag }}<br/> {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="save btn btn-default">Limiter</button>
+        </form>
+    </div>
+    <div class="col">
+        {% if result %}
+        <label>Formatted Text:</label><br/>
+        <textarea class="form-control" rows="{{ quantity_lines }}" id="comment">{{ result }}</textarea>
+
+        {% endif %}
+    </div>
+</div>
+
 
 {% endblock %}
